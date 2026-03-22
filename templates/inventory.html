@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>مخزون الأدوية - المتجر اليمني الرقمي</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 20px; background: #f8f9fa; }
+        .invoice-header { background: white; border: 2px solid #28a745; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .invoice-header h2 { margin: 0 0 10px 0; color: #28a745; }
+        .search-container { position: sticky; top: 0; background: #f8f9fa; padding: 10px 0; z-index: 100; }
+        #smartSearch { width: 100%; padding: 15px; border: 2px solid #007bff; border-radius: 30px; font-size: 16px; outline: none; }
+        table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        th, td { padding: 12px; border: 1px solid #dee2e6; text-align: center; }
+        th { background: #007bff; color: white; }
+        .qty-input { width: 70px; padding: 5px; text-align: center; border: 1px solid #28a745; border-radius: 5px; }
+        .action-bar { margin: 20px 0; display: flex; gap: 10px; }
+        .btn { padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 16px; }
+        .btn-print { background: #17a2b8; color: white; }
+        .btn-send { background: #28a745; color: white; }
+        @media print { .search-container, .btn, .qty-input { display: none; } .qty-print { display: block !important; } }
+    </style>
+</head>
+<body>
+
+<div class="invoice-header" id="invoice">
+    <h2>الجمهورية اليمنية - فاتورة طلبية أدوية</h2>
+    <div style="display: flex; justify-content: space-between;">
+        <p>صيدلية: <strong>{{ profile.pharmacy_name }}</strong></p>
+        <p>الموقع: <strong>{{ profile.location }}</strong></p>
+        <p>التاريخ: <strong>2026-03-22</strong></p>
+    </div>
+    <p>مسؤول المشتريات: <strong>{{ profile.manager_phone }}</strong></p>
+</div>
+
+<div class="search-container">
+    <input type="text" id="smartSearch" onkeyup="doSearch()" placeholder="🔍 بحث ذكي عن صنف... (اكتب اسم الدواء هنا)">
+</div>
+
+<div class="action-bar">
+    <button class="btn btn-print" onclick="window.print()">🖨️ عرض وتنزيل الفاتورة</button>
+    <form action="{% url 'send_order' %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-send">🚀 إرسال الطلب للأدمن</button>
+    </form>
+</div>
+
+<table id="invTable">
+    <thead>
+        <tr>
+            <th>رقم المخزون</th>
+            <th>اسم الصنف</th>
+            <th>تاريخ الانتهاء</th>
+            <th>الكمية المطلوبة</th>
+            <th>الإجمالي (ريال)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in inventory %}
+        <tr>
+            <td>{{ item.batch_number }}</td>
+            <td class="item-name">{{ item.name }}</td>
+            <td>{{ item.expiry }}</td>
+            <td><input type="number" class="qty-input" value="0" min="0" onchange="calcTotal(this, {{ item.price }})"></td>
+            <td class="row-total">0</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">لا يوجد مخزون متاح حالياً. يرجى إضافة أصناف من لوحة التحكم.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    function doSearch() {
+        let input = document.getElementById('smartSearch').value.toUpperCase();
+        let rows = document.getElementById('invTable').getElementsByTagName('tr');
+        for (let i = 1; i < rows.length; i++) {
+            let name = rows[i].querySelector('.item-name').innerText;
+            rows[i].style.display = name.toUpperCase().includes(input) ? "" : "none";
+        }
+    }
+
+    function calcTotal(input, price) {
+        let row = input.closest('tr');
+        let totalCell = row.querySelector('.row-total');
+        totalCell.innerText = (input.value * price).toLocaleString();
+    }
+</script>
+
+</body>
+</html>
