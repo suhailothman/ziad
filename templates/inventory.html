@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>مخزون الأدوية - المتجر الرقمي</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; }
+        .header-info { background: #eee; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-right: 5px solid #28a745; }
+        .search-box { margin-bottom: 20px; width: 100%; display: flex; gap: 10px; }
+        .search-box input { flex-grow: 1; padding: 10px; font-size: 16px; border: 2px solid #28a745; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+        th { background-color: #28a745; color: white; }
+        .qty-input { width: 60px; padding: 5px; text-align: center; }
+        .action-btns { position: sticky; top: 0; background: white; padding: 10px; display: flex; gap: 10px; z-index: 100; border-bottom: 2px solid #ddd; }
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-invoice { background: #17a2b8; color: white; }
+        .btn-send { background: #28a745; color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="action-btns">
+        <button class="btn btn-invoice" onclick="window.print()">عرض وتنزيل الفاتورة</button>
+        <form action="{% url 'send_order' %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-send">إرسال الطلب للأدمن</button>
+        </form>
+        <span style="margin-right: auto; font-weight: bold;">مرحباً د. {{ user.username }}</span>
+    </div>
+
+    <div class="header-info">
+        <h3>ترويسة الفاتورة التلقائية</h3>
+        <p>الصيدلية: <strong>صيدلية السلام النموذجية (مثال)</strong> | الموقع: <strong>صنعاء - شارع تعز</strong></p>
+    </div>
+
+    <div class="search-box">
+        <input type="text" id="searchInput" onkeyup="smartSearch()" placeholder="ابحث عن اسم الصنف هنا (بحث ذكي)...">
+    </div>
+
+    <table id="inventoryTable">
+        <thead>
+            <tr>
+                <th>رقم المخزون</th>
+                <th>اسم الصنف</th>
+                <th>تاريخ الانتهاء</th>
+                <th>الكمية المطلوبة</th>
+                <th>الإجمالي</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in inventory %}
+            <tr>
+                <td>{{ item.id }}</td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.expiry }}</td>
+                <td><input type="number" class="qty-input" value="0" min="0"></td>
+                <td>0 ريال</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        function smartSearch() {
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("searchInput");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("inventoryTable");
+            tr = table.getElementsByTagName("tr");
+
+            for (i = 1; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[1]; // البحث في عمود الاسم
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
