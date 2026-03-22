@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل صيدلية جديدة</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .reg-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 450px; }
+        h2 { color: #28a745; text-align: center; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
+        button { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 17px; font-weight: bold; transition: 0.3s; }
+        button:hover { background: #218838; }
+        .footer-link { text-align: center; margin-top: 15px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="reg-card">
+        <h2>إنشاء حساب صيدلية</h2>
+        <form method="post">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="رقم الهاتف أو اسم المستخدم" required>
+            <input type="password" name="password" placeholder="كلمة المرور" required>
+            <hr>
+            <input type="text" name="pharmacy_name" placeholder="اسم الصيدلية الرسمي" required>
+            <input type="text" name="location" placeholder="العنوان (مثال: صنعاء - حزيز)" required>
+            <input type="text" name="manager_phone" placeholder="رقم مدير المشتريات" required>
+            <button type="submit">تسجيل وحفظ البيانات</button>
+        </form>
+        <div class="footer-link">لديك حساب بالفعل؟ <a href="{% url 'login' %}">سجل دخولك هنا</a></div>
+    </div>
+</body>
+</html>
